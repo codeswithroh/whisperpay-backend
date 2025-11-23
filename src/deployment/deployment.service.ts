@@ -4,6 +4,7 @@ import { OrbitService } from '../orbit/orbit.service';
 import { DeploymentRepository } from './deployment.repository';
 import * as crypto from 'crypto';
 import { EncryptPayloadDto } from './dto/encrypt.dto';
+import { arbitrumSepolia } from 'viem/chains';
 
 @Injectable()
 export class DeploymentService {
@@ -102,9 +103,9 @@ export class DeploymentService {
 
     const enc = this.encryptPayload(key, dto.items);
     await this.repo.saveEncryptedMessage(user._id, enc);
+    await this.repo.createTransaction(user._id, dto.items.map(i => ({ recipient: i.recipient, amount: i.amount })));
 
-    const latest = await this.repo.findLatestByUserId(user._id);
-    const l3ChainId = latest ? String(latest.chainId) : '';
+    const l3ChainId = String(arbitrumSepolia.id);
     const encryptedMessage = `${enc.ivB64}:${enc.tagB64}:${enc.ciphertextB64}`;
 
     return {
