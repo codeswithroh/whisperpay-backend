@@ -5,6 +5,7 @@ import { User } from '../users/user.schema';
 import { Deployment } from './deployment.schema';
 import { UserSecret } from '../security/user-secret.schema';
 import { EncryptedMessage } from '../security/encrypted-message.schema';
+import { Transaction } from '../transactions/transaction.schema';
 
 export interface DeploymentRecord {
   userWallet: string;
@@ -21,6 +22,7 @@ export class DeploymentRepository {
     @InjectModel(Deployment.name) private readonly deploymentModel: Model<Deployment>,
     @InjectModel(UserSecret.name) private readonly userSecretModel: Model<UserSecret>,
     @InjectModel(EncryptedMessage.name) private readonly encMsgModel: Model<EncryptedMessage>,
+    @InjectModel(Transaction.name) private readonly txModel: Model<Transaction>,
   ) {}
 
   async append(record: DeploymentRecord) {
@@ -86,5 +88,19 @@ export class DeploymentRepository {
       tag: data.tagB64,
       ciphertext: data.ciphertextB64,
     });
+  }
+
+  async createTransaction(userId: any, items: { recipient: string; amount: string }[]) {
+    return this.txModel.create({ user: userId, items, status: 'pending' });
+  }
+
+  async findPendingByWallet(wallet: string) {
+    const user = await this.findUserByWallet(wallet);
+    if (!user) return null;
+    return this.txModel.findOne({ user: (user as any)._id, status: 'pending' }).lean();
+  }
+
+  async completeByUserId(userId: any) {
+    await this.txModel.updateMany({ user: userId, status: 'pending' }, { $set: { status: 'completed' } });
   }
 }
