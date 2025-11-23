@@ -8,6 +8,7 @@ import { Deployment, DeploymentSchema } from '../deployment/deployment.schema';
 import { UserSecret, UserSecretSchema } from '../security/user-secret.schema';
 import { EncryptedMessage, EncryptedMessageSchema } from '../security/encrypted-message.schema';
 import { Transaction, TransactionSchema } from '../transactions/transaction.schema';
+import { ListenerController } from './listener.controller';
 
 @Module({
   imports: [
@@ -21,5 +22,6 @@ import { Transaction, TransactionSchema } from '../transactions/transaction.sche
     ]),
   ],
   providers: [ListenerService, DeploymentRepository],
+  controllers: [ListenerController],
 })
 export class ListenerModule {}
