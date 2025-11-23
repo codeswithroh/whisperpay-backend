@@ -103,8 +103,7 @@ export class DeploymentService {
     const enc = this.encryptPayload(key, dto.items);
     await this.repo.saveEncryptedMessage(user._id, enc);
 
-    const latest = await this.repo.findLatestByUserId(user._id);
-    const l3ChainId = latest ? String(latest.chainId) : '';
+    const l3ChainId = String(this.generateChainId(userWallet));
     const encryptedMessage = `${enc.ivB64}:${enc.tagB64}:${enc.ciphertextB64}`;
 
     return {
